@@ -29,7 +29,7 @@ public class GameRoom {
     private final short cardsInHandByPlayer; // количество кард у одного игрока в руке
 
     private final Map<PlayingUser, Card[]> playerHands = new ConcurrentHashMap<>(); // карты в руке игрока
-    private final Map<PlayingUser, BossCard> bossCards=new ConcurrentHashMap<>();
+    //private final Map<PlayingUser, BossCard> bossCards=new ConcurrentHashMap<>();
 
 
     @NotNull
@@ -62,16 +62,18 @@ public class GameRoom {
             if (users[0]==null) {
                 users[0]=user;
                 playerHands.put(users[0], gameCardService.makeHand((short) 12, eviluser));
-                bossCards.put(users[0], new BossCard(eviluser));
+                users[0].setCurrentRoom(this.getId());
+                field.setBoss(users[0],new BossCard(eviluser));
                 eviluser=!eviluser;
                 if (users[1]!=null) setRoomStatus(RoomStatus.GAME_PHASE);
                 else setRoomStatus(RoomStatus.LOOKING_FOR_PEOPLE);
             }
             else {
                 if (users[1]!=null) {
-                    users[0]=user;
-                    playerHands.put(users[0], gameCardService.makeHand((short) 12, eviluser));
-                    bossCards.put(users[0], new BossCard(eviluser));
+                    users[1]=user;
+                    playerHands.put(users[1], gameCardService.makeHand((short) 12, eviluser));
+                    users[1].setCurrentRoom(this.getId());
+                    field.setBoss(users[1],new BossCard(eviluser));
                     eviluser=!eviluser;
                     if (users[0]!=null) setRoomStatus(RoomStatus.GAME_PHASE);
                     else setRoomStatus(RoomStatus.LOOKING_FOR_PEOPLE);
@@ -86,8 +88,8 @@ public class GameRoom {
     }
 
     @NotNull
-    public UserHand getHand(PlayingUser user) {
-        return new UserHand(this.playerHands.get(user), bossCards.get(user));
+    public Card[] getHand(PlayingUser user) {
+        return this.playerHands.get(user);
     }
 
     @NotNull
@@ -163,7 +165,7 @@ public class GameRoom {
     }
     public boolean activateBossCard(PlayingUser user) {
         if (playerHands.containsKey(user)) {
-            return bossCards.get(user).activate();
+            return field.getBoss(user).activate();
         }
         else return false;
     }

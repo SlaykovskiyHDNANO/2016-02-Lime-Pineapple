@@ -26,6 +26,7 @@ import java.io.IOException;
  * package: game.services
  */
 public class GameEngineService {
+    public static final String SKIP_MESSAGE="Game.PlayerAct.Response.Skipped";
     static final Logger LOGGER = LogManager.getLogger();
     final MessageService messageService;
     final AccountService accountService;
@@ -100,8 +101,11 @@ public class GameEngineService {
         final Gson messInfo= new Gson();
         if (actData.skippedTurn) {
             try {
-
-                this.messageService.sendMessage(new Client(room.getAnotherPlayer(actor)), new Message(MessageType.GAME, "Skipped"));
+                actor.setSkipped(true);
+                if (room.getAnotherPlayer(actor).isSkipped()) {
+                    //room.
+                }
+                this.messageService.sendMessage(room.getAnotherPlayer(actor), new Message(MessageType.GAME, SKIP_MESSAGE));
 
             }
             catch (IOException e) {
@@ -112,9 +116,9 @@ public class GameEngineService {
             room.activateBossCard(actor);
             try {
                 if (room.activateBossCard(actor)) {
-                    this.messageService.sendMessage(new Client(room.getAnotherPlayer(actor)),  new Message(MessageType.GAME,messInfo.toJson(room.getHand(actor))));
+                    this.messageService.sendMessage(room,  new Message(MessageType.GAME,messInfo.toJson(room.getHand(actor))));
                 }
-                this.messageService.sendMessage(new Client(room.getAnotherPlayer(actor)), new Message(MessageType.GAME,messInfo.toJson(room.getCurrentField())));
+                this.messageService.sendMessage(room, new Message(MessageType.GAME,messInfo.toJson(room.getCurrentField())));
             } catch (IOException e) {
                 System.out.println(e.getMessage());// обрабатываем действия юзера
             }
@@ -123,11 +127,12 @@ public class GameEngineService {
             room.placeCard(actor, actData.playerCardId, actData.rowIndex, actData.columnIndex);
             try {
 
-                this.messageService.sendMessage(new Client(room.getAnotherPlayer(actor)), new Message(MessageType.GAME, messInfo.toJson(room.getCurrentField())));
+                this.messageService.sendMessage(room, new Message(MessageType.GAME, messInfo.toJson(room.getCurrentField())));
             } catch (IOException e) {
                 System.out.println(e.getMessage());// обрабатываем действия юзера
             }
         }
+        // ToDo доделать сообщения на юзера
         // действия юзера - активировал карту босса, поставил карту на поле, пропустил ход.
 
         // выполняем действия после хода юзера
@@ -148,7 +153,7 @@ public class GameEngineService {
         }
 
     }
-    
+
 
     private void onClientDisconnected(Client client) {
         try {

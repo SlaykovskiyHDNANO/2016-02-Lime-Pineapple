@@ -3,9 +3,12 @@ package game.services;
 import game.GameRoom;
 import game.PlayingUser;
 import org.jetbrains.annotations.NotNull;
+import server.messaging.Message;
 import server.messaging.MessageService;
+import server.messaging.MessageType;
 import server.messaging.messages.SystemMessage;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -64,6 +67,12 @@ public class MatchmakingService {
                 gameRoom.addUser(sender.getUser());
                 service.addActiveRoom(gameRoom);
                 waitingUser=null;
+                try {
+                    service.sendMessage(gameRoom, new Message(MessageType.MATCHMAKING, "Matchmaking.JoinRoom.Response"));
+                }
+                catch (IOException e) {
+
+                }
             }
         });
 
