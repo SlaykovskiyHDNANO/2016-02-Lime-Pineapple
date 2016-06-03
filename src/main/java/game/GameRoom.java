@@ -1,8 +1,6 @@
 package game;
 
 import db.models.User;
-import db.models.game.cards.CardModel;
-import db.services.CardService;
 import game.services.GameCardService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

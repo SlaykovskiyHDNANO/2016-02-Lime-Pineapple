@@ -20,13 +20,13 @@ public class MatchmakingService {
         public static final String LEAVE_ROOM_REQUEST = "Matchmaking.Room.Leave";
         public static final String JOIN_ROOM_REQUEST = "Matchmaking.Room.Join";
         public static final String LIST_ROOMS_REQUEST ="Matchmaking.List.Rooms";
-
     }
     final Map<Long, GameRoom> activeRooms = new ConcurrentHashMap<>();
     final AtomicLong counter = new AtomicLong(0L);
     final AtomicLong userCounter=new AtomicLong(0L);
     final Map<Long, PlayingUser> activeUsers = new ConcurrentHashMap<>();
     final MessageService service;
+    PlayingUser waitingUser=null;
     final GameCardService gameCardService=new GameCardService();
     public MatchmakingService(@NotNull MessageService service) {
         this.service = service;
@@ -43,7 +43,7 @@ public class MatchmakingService {
             // TODO: do something here
             final long newRoomId=counter.incrementAndGet();
             final GameRoom newGame=new GameRoom(gameCardService, newRoomId, (short)10);
-            activeRooms.put(newRoomId, newGame);
+            service.addActiveRoom(newGame);
         });
 
         this.service.subscribe(MESSAGES.LEAVE_ROOM_REQUEST, (sender, message) -> {
@@ -53,7 +53,17 @@ public class MatchmakingService {
 
         this.service.subscribe(MESSAGES.JOIN_ROOM_REQUEST, (sender, message) -> {
             // TODO: do something here
-
+            if (waitingUser==null) waitingUser=sender.getUser();
+            else {
+                final long newRoomId=counter.incrementAndGet();
+                final GameRoom gameRoom=new GameRoom(gameCardService,newRoomId, (short)12);
+                waitingUser.setCurrentRoom(newRoomId);
+                sender.getUser().setCurrentRoom(newRoomId);
+                gameRoom.addUser(waitingUser);
+                gameRoom.addUser(sender.getUser());
+                service.addActiveRoom(gameRoom);
+                waitingUser=null;
+            }
         });
 
         this.service.subscribe(MESSAGES.LIST_ROOMS_REQUEST, (sender, message) -> {
