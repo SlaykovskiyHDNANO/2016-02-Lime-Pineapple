@@ -1,6 +1,7 @@
 package db.models.game.cards;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -14,7 +15,18 @@ public class CardModel {
 
     @Id
     @Column
-    String cardName;
+    public String cardName;
+
+    @Column(name="power")
+    int power;
+    @Column(name="melle")
+    boolean playersCardContainerMelee=false;
+    @Column(name="enmelee")
+    boolean enemyCardContainerMelee=false;
+    @Column(name="distant")
+    boolean playerCardContainerDistant=false;
+    @Column(name="endistant")
+    boolean enemyCardContainerDistant=false;
 
     @Column
     String cardDescription;
@@ -37,13 +49,21 @@ public class CardModel {
         return cardEffects;
     }
 
-    CardModel() {
+    public CardModel() {
         this.cardEffects = new Vector<>();
         this.cardType = CardType.NONE;
     }
+    public void addEffect(@Nullable EffectModel effect) {
+        cardEffects.add(effect);
+    }
 
-    CardModel(CardType type, long lifetime) {
+    public void setCharacters(CardType type, long lifetime, boolean playmelee, boolean enemymelee, boolean playdistant, boolean enemydistant, int strength) {
         this.cardType=type;
         this.cardEffects = new Vector<>();
+        this.enemyCardContainerMelee=enemymelee;
+        this.enemyCardContainerDistant=enemydistant;
+        this.playerCardContainerDistant=playdistant;
+        this.playersCardContainerMelee=playmelee;
+        this.power=strength;
     }
 }

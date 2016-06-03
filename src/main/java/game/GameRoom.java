@@ -2,6 +2,7 @@ package game;
 
 import db.models.User;
 import db.models.game.cards.CardModel;
+import db.services.CardService;
 import game.services.GameCardService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +25,7 @@ public class GameRoom {
     final GameCardService gameCardService;
     final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     GameField field=new GameField(new GameFieldRow[4]);
+    boolean eviluser;
 
     //GAME VALUES
     private final short cardsInHandByPlayer; // количество кард у одного игрока в руке
@@ -47,6 +49,7 @@ public class GameRoom {
         this.id = id;
         this.cardsInHandByPlayer = totalHandCards;
         this.gameCardService = gameCardService;
+        eviluser=false;
     }
 
     public short getCardsInHandByPlayer() {
@@ -56,18 +59,24 @@ public class GameRoom {
     public void addUser(@NotNull PlayingUser user) {
         rwLock.writeLock().lock();
         try {
-            for (int i = 0, s = users.length; i<s; ++i) {
-                if (users[i] != null) {
-                    users[i] = user;
-                    this.playerHands.put(user, gameCardService.makeHand(this.cardsInHandByPlayer));
-                }
-                else if (Objects.equals(users[i], user))
-                {
-                    LOGGER.warn("Adding same user to room twice");
-                    return;
+            if (users[0]==null) {
+                users[0]=user;
+                playerHands.put(users[0], gameCardService.makeHand((short) 12, eviluser));
+                eviluser=!eviluser;
+                if (users[1]!=null) setRoomStatus(RoomStatus.GAME_PHASE);
+                else setRoomStatus(RoomStatus.LOOKING_FOR_PEOPLE);
+            }
+            else {
+                if (users[1]!=null) {
+                    users[0]=user;
+                    playerHands.put(users[0], gameCardService.makeHand((short) 12, eviluser));
+                    eviluser=!eviluser;
+                    if (users[0]!=null) setRoomStatus(RoomStatus.GAME_PHASE);
+                    else setRoomStatus(RoomStatus.LOOKING_FOR_PEOPLE);
                 }
             }
-        } catch(Throwable t) {
+        }
+        catch(Throwable t) {
             LOGGER.warn(String.format("Exception during adding user into room.%n%s", t.toString()));
             rwLock.writeLock().unlock();
         }
@@ -155,4 +164,5 @@ public class GameRoom {
         }
         else return false;
     }
+
 }

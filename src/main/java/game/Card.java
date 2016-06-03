@@ -22,7 +22,7 @@ public class Card {
         return id;
     }
 
-    Card(@NotNull  CardModel model, @NotNull  Integer id) {
+    public Card(@NotNull  CardModel model, @NotNull  Integer id) {
         this.model = model;
         this.id = id;
     }
