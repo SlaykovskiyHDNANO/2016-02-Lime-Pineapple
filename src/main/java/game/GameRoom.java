@@ -153,6 +153,7 @@ public class GameRoom {
         }
         else return false;
     }
+    public void setField(GameField field1) {this.field=field1;}
     public GameField getCurrentField() {
         return field;
     }
