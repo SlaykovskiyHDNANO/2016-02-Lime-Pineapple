@@ -29,6 +29,8 @@ public class GameRoom {
     private final short cardsInHandByPlayer; // количество кард у одного игрока в руке
 
     private final Map<PlayingUser, Card[]> playerHands = new ConcurrentHashMap<>(); // карты в руке игрока
+    private final Map<PlayingUser, BossCard> bossCards=new ConcurrentHashMap<>();
+
 
     @NotNull
     public RoomStatus getRoomStatus() {
@@ -60,6 +62,7 @@ public class GameRoom {
             if (users[0]==null) {
                 users[0]=user;
                 playerHands.put(users[0], gameCardService.makeHand((short) 12, eviluser));
+                bossCards.put(users[0], new BossCard(eviluser));
                 eviluser=!eviluser;
                 if (users[1]!=null) setRoomStatus(RoomStatus.GAME_PHASE);
                 else setRoomStatus(RoomStatus.LOOKING_FOR_PEOPLE);
@@ -68,6 +71,7 @@ public class GameRoom {
                 if (users[1]!=null) {
                     users[0]=user;
                     playerHands.put(users[0], gameCardService.makeHand((short) 12, eviluser));
+                    bossCards.put(users[0], new BossCard(eviluser));
                     eviluser=!eviluser;
                     if (users[0]!=null) setRoomStatus(RoomStatus.GAME_PHASE);
                     else setRoomStatus(RoomStatus.LOOKING_FOR_PEOPLE);
@@ -82,8 +86,8 @@ public class GameRoom {
     }
 
     @NotNull
-    public Card[] getHand(PlayingUser user) {
-        return this.playerHands.get(user);
+    public UserHand getHand(PlayingUser user) {
+        return new UserHand(this.playerHands.get(user), bossCards.get(user));
     }
 
     @NotNull
@@ -159,7 +163,7 @@ public class GameRoom {
     }
     public boolean activateBossCard(PlayingUser user) {
         if (playerHands.containsKey(user)) {
-            return true;
+            return bossCards.get(user).activate();
         }
         else return false;
     }

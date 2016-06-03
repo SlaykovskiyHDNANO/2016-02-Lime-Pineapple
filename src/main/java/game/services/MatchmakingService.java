@@ -48,6 +48,7 @@ public class MatchmakingService {
 
         this.service.subscribe(MESSAGES.LEAVE_ROOM_REQUEST, (sender, message) -> {
             // TODO: do something here
+            service.removeClient(sender);
 
         });
 

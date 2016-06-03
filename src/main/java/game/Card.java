@@ -26,5 +26,4 @@ public class Card {
         this.model = model;
         this.id = id;
     }
-
 }

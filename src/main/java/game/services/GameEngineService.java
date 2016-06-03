@@ -100,7 +100,9 @@ public class GameEngineService {
         final Gson messInfo= new Gson();
         if (actData.skippedTurn) {
             try {
+
                 this.messageService.sendMessage(new Client(room.getAnotherPlayer(actor)), new Message(MessageType.GAME, "Skipped"));
+
             }
             catch (IOException e) {
                 System.out.println(e.getMessage());// обрабатываем действия юзера
@@ -109,6 +111,9 @@ public class GameEngineService {
         else if (actData.activatedBossCard) {
             room.activateBossCard(actor);
             try {
+                if (room.activateBossCard(actor)) {
+                    this.messageService.sendMessage(new Client(room.getAnotherPlayer(actor)),  new Message(MessageType.GAME,messInfo.toJson(room.getHand(actor))));
+                }
                 this.messageService.sendMessage(new Client(room.getAnotherPlayer(actor)), new Message(MessageType.GAME,messInfo.toJson(room.getCurrentField())));
             } catch (IOException e) {
                 System.out.println(e.getMessage());// обрабатываем действия юзера
@@ -143,6 +148,7 @@ public class GameEngineService {
         }
 
     }
+    
 
     private void onClientDisconnected(Client client) {
         try {

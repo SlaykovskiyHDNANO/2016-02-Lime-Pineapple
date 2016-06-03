@@ -39,7 +39,7 @@ public class EffectModel {
         this.typeName = CardType.NONE;
     }
 
-    EffectModel(@NotNull String descriptions, @NotNull String cardName, @NotNull CardType type, @NotNull String effectPath) {
+    public EffectModel(@NotNull String descriptions, @NotNull String cardName, @NotNull CardType type, @NotNull String effectPath) {
         description=descriptions;
         name=cardName;
         typeName = type;

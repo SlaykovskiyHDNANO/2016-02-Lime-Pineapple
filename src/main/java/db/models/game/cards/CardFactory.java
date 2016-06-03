@@ -1,5 +1,6 @@
 package db.models.game.cards;
 
+import game.BossCard;
 import game.Card;
 import org.jetbrains.annotations.Nullable;
 
