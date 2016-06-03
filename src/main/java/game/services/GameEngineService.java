@@ -59,9 +59,9 @@ public class GameEngineService {
     // ENGINE LOGIC GAME
 
 
-    void endGame(@NotNull GameRoom room,@NotNull Client winnerClient,@NotNull EndGameReason reason) {
-        final PlayingUser winner = winnerClient.getUser();
-        final PlayingUser loser = room.getAnotherPlayer(winnerClient.getUser());
+    void endGame(@NotNull GameRoom room,@NotNull PlayingUser winnerClient,@NotNull EndGameReason reason) {
+        final PlayingUser winner = winnerClient;
+        final PlayingUser loser = room.getAnotherPlayer(winnerClient);
         final User winnerUser = winner.getLinkedUser();
         final User loserUser = loser.getLinkedUser();
         // обновим данные победителя
@@ -74,7 +74,12 @@ public class GameEngineService {
         try {
             switch (reason) {
                 case DISCONNECT:
-                    this.messageService.sendMessage(winnerClient, new EndGameMessageResponse(winnerUser, reason));
+                    try {
+                        this.messageService.sendMessage(winnerClient, new EndGameMessageResponse(winnerUser, reason));
+                    }
+                    catch (NotFoundException e){
+                        LOGGER.warn(e.getMessage());
+                    }
                     break;
                 case WE_HAVE_A_WINNER:
                     // обновим данные проигравшего, но только если он не отключался
@@ -96,6 +101,20 @@ public class GameEngineService {
 
     }
 
+    void endRound(GameRoom room) {
+        if (room.getUser(0).getCurrentScore()>=room.getUser(1).getCurrentScore()) {
+            room.getUser(0).setLives((short)(room.getUser(0).getLives()-1));
+            room.getUser(0).setSkipped(false);
+            if (room.getUser(0).getLives()==0) endGame(room, room.getUser(1), EndGameReason.WE_HAVE_A_WINNER);
+        }
+        else {
+            room.getUser(1).setLives((short)(room.getUser(1).getLives()-1));
+            room.getUser(1).setSkipped(false);
+            if (room.getUser(1).getLives()==0) endGame(room, room.getUser(0), EndGameReason.WE_HAVE_A_WINNER);
+        }
+
+    }
+
     void playerAct(@NotNull GameRoom room, @NotNull PlayingUser actor, @NotNull PlayerActMessage.PlayerActData actData) {
         // выполняем действия до действия юзера
         final Gson messInfo= new Gson();
@@ -103,9 +122,14 @@ public class GameEngineService {
             try {
                 actor.setSkipped(true);
                 if (room.getAnotherPlayer(actor).isSkipped()) {
-                    //room.
+                     endRound(room);
                 }
-                this.messageService.sendMessage(room.getAnotherPlayer(actor), new Message(MessageType.GAME, SKIP_MESSAGE));
+                try {
+                    this.messageService.sendMessage(room.getAnotherPlayer(actor), new Message(MessageType.GAME, SKIP_MESSAGE));
+                }
+                catch (NotFoundException e) {
+                    LOGGER.warn(e.getMessage());
+                }
 
             }
             catch (IOException e) {
@@ -116,7 +140,7 @@ public class GameEngineService {
             room.activateBossCard(actor);
             try {
                 if (room.activateBossCard(actor)) {
-                    this.messageService.sendMessage(room,  new Message(MessageType.GAME,messInfo.toJson(room.getHand(actor))));
+                    this.messageService.sendMessage(room, new Message(MessageType.GAME,messInfo.toJson(room.getHand(actor))));
                 }
                 this.messageService.sendMessage(room, new Message(MessageType.GAME,messInfo.toJson(room.getCurrentField())));
             } catch (IOException e) {
@@ -158,7 +182,7 @@ public class GameEngineService {
     private void onClientDisconnected(Client client) {
         try {
             final GameRoom room = messageService.getRoom(client);
-            this.endGame(room, client, EndGameReason.DISCONNECT);
+            this.endGame(room, client.getUser(), EndGameReason.DISCONNECT);
         } catch (NotFoundException t) {
             LOGGER.warn(String.format("[ W ] Exception during event handler: onClientDisconnected(). Is client without room disconnected?%n%s", t.toString()));
         }

@@ -56,12 +56,16 @@ public class GameRoom {
         return cardsInHandByPlayer;
     }
 
+    public PlayingUser getUser(int i) {
+        return users[i];
+    }
+
     public void addUser(@NotNull PlayingUser user) {
         rwLock.writeLock().lock();
         try {
             if (users[0]==null) {
                 users[0]=user;
-                playerHands.put(users[0], gameCardService.makeHand((short) 12, eviluser));
+                playerHands.put(users[0], gameCardService.makeHand((short) 12, user[0]));
                 users[0].setCurrentRoom(this.getId());
                 field.setBoss(users[0],new BossCard(eviluser));
                 eviluser=!eviluser;
@@ -71,7 +75,7 @@ public class GameRoom {
             else {
                 if (users[1]!=null) {
                     users[1]=user;
-                    playerHands.put(users[1], gameCardService.makeHand((short) 12, eviluser));
+                    playerHands.put(users[1], gameCardService.makeHand((short) 12, user[1]));
                     users[1].setCurrentRoom(this.getId());
                     field.setBoss(users[1],new BossCard(eviluser));
                     eviluser=!eviluser;

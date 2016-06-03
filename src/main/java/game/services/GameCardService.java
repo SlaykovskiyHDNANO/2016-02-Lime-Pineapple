@@ -49,6 +49,7 @@ public class GameCardService {
 
     protected Card makeCard(@NotNull CardModel model, @NotNull PlayingUser owner) {
         // TODO: make card
+        return null;
     }
 
     public Card makeRandomCard(@NotNull PlayingUser owner) {
