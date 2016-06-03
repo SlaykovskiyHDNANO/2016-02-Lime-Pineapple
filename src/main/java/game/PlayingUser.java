@@ -15,7 +15,29 @@ public class PlayingUser {
     private User linkedUser;
     private int currentScore = 0;
     private long currentRoom;
-    private short lives = 0;
+    private boolean skipped=false;
+
+    public boolean isSkipped() {
+        return skipped;
+    }
+
+    public void setSkipped(boolean skipped) {
+        this.skipped = skipped;
+    }
+
+    public short getLives() {
+        return lives;
+    }
+
+    public void setLives(short lives) {
+        this.lives = lives;
+    }
+
+    public void setCurrentScore(int currentScore) {
+        this.currentScore = currentScore;
+    }
+
+    private short lives = 2;
 
     @NotNull
     public User getLinkedUser() {
