@@ -20,7 +20,7 @@ import server.messaging.MessageService;
 
 import java.io.IOException;
 import java.net.HttpCookie;
-import java.rmi.AccessException;
+//import java.rmi.AccessException;
 import java.util.List;
 
 public class MessagingSocketCreator implements WebSocketCreator

@@ -13,7 +13,6 @@ public class GameField {
 
 
     final GameFieldRow[] rows; //current game deck
-
     public GameField(GameFieldRow[] rows) {
         this.rows = rows;
     }

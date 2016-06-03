@@ -83,7 +83,7 @@ public class Message implements Serializable {
         if (this == o) return true;
         if (!(o instanceof Message)) return false;
 
-        Message message = (Message) o;
+        final Message message = (Message) o;
 
         if (getType() != message.getType()) return false;
         if (!getName().equals(message.getName())) return false;
@@ -94,7 +94,7 @@ public class Message implements Serializable {
     @Override
     public int hashCode() {
         int result = getType().hashCode();
-        result = 31 * result + getName().hashCode();
+        //result = 31 * result + getName().hashCode();
         result = 31 * result + getDataString().hashCode();
         return result;
     }

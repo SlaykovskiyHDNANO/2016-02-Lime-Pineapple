@@ -21,11 +21,10 @@ public class Client {
         return user;
     }
 
-    public void setClientId(@NotNull long id) {
+    public void setClientId(long id) {
         this.clientId = id;
     }
 
-    @NotNull
     public long getClientId() {
         return clientId;
     }

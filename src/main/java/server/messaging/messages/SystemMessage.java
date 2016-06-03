@@ -14,7 +14,6 @@ public class SystemMessage extends Message {
         public static final String CLIENT_CONNECTED = "System.Client.Connected";
 
     }
-
     public SystemMessage(@NotNull String name) {
         super(MessageType.SYSTEM, name);
     }

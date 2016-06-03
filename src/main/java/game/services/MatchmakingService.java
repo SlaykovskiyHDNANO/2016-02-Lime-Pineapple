@@ -22,14 +22,12 @@ public class MatchmakingService {
         public static final String LIST_ROOMS_REQUEST ="Matchmaking.List.Rooms";
 
     }
-
-
     final Map<Long, GameRoom> activeRooms = new ConcurrentHashMap<>();
     final AtomicLong counter = new AtomicLong(0L);
     final AtomicLong userCounter=new AtomicLong(0L);
     final Map<Long, PlayingUser> activeUsers = new ConcurrentHashMap<>();
     final MessageService service;
-
+    final GameCardService gameCardService=new GameCardService();
     public MatchmakingService(@NotNull MessageService service) {
         this.service = service;
     }
@@ -37,12 +35,15 @@ public class MatchmakingService {
     public void configure() {
         this.service.subscribe(SystemMessage.MESSAGES.CLIENT_DISCONNECTED, (sender, message) -> {
             // TODO: do something here
+            sender.getUser();
 
         });
 
         this.service.subscribe(MESSAGES.CREATE_ROOM_REQUEST, (sender, message) -> {
             // TODO: do something here
-
+            final long newRoomId=counter.incrementAndGet();
+            final GameRoom newGame=new GameRoom(gameCardService, newRoomId, (short)10);
+            activeRooms.put(newRoomId, newGame);
         });
 
         this.service.subscribe(MESSAGES.LEAVE_ROOM_REQUEST, (sender, message) -> {

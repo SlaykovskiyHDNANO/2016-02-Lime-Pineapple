@@ -8,6 +8,9 @@ import game.PlayingUser;
 import game.services.messages.EndGameMessageResponse;
 import game.services.messages.GameMessageDeserializer;
 import game.services.messages.PlayerActMessage;
+import javassist.NotFoundException;
+import server.messaging.Message;
+import server.messaging.MessageType;
 import server.messaging.messages.SystemMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +28,6 @@ public class GameEngineService {
     static final Logger LOGGER = LogManager.getLogger();
     final MessageService messageService;
     final AccountService accountService;
-
     final GameMessageDeserializer deserializer;
 
     public GameEngineService(@NotNull GameMessageDeserializer deserializer,
@@ -94,8 +96,30 @@ public class GameEngineService {
 
     void playerAct(@NotNull GameRoom room, @NotNull PlayingUser actor, @NotNull PlayerActMessage.PlayerActData actData) {
         // выполняем действия до действия юзера
-
-        // обрабатываем действия юзера
+        if (actData.skippedTurn) {
+            try {
+                this.messageService.sendMessage(new Client(room.getAnotherPlayer(actor)), new Message(MessageType.GAME, "Skipped"));
+            }
+            catch (IOException e) {
+                System.out.println(e.getMessage());// обрабатываем действия юзера
+            }
+        }
+        else if (actData.activatedBossCard) {
+            room.activateBossCard(actor);
+            try {
+                this.messageService.sendMessage(new Client(room.getAnotherPlayer(actor)), new Message(MessageType.GAME,room.getCurrentField().toString()));
+            } catch (IOException e) {
+                System.out.println(e.getMessage());// обрабатываем действия юзера
+            }
+        }
+        else {
+            room.placeCard(actor, actData.playerCardId, actData.rowIndex, actData.columnIndex);
+            try {
+                this.messageService.sendMessage(new Client(room.getAnotherPlayer(actor)), new Message(MessageType.GAME, room.getCurrentField().toString()));
+            } catch (IOException e) {
+                System.out.println(e.getMessage());// обрабатываем действия юзера
+            }
+        }
         // действия юзера - активировал карту босса, поставил карту на поле, пропустил ход.
 
         // выполняем действия после хода юзера
@@ -111,7 +135,7 @@ public class GameEngineService {
             final GameRoom room = messageService.getRoom(client);
             assert (PlayerActMessage.PlayerActData) message.getData() != null;
             this.playerAct(room, client.getUser(), (PlayerActMessage.PlayerActData) message.getData());
-        } catch (Throwable t) {
+        } catch (NotFoundException t) {
             LOGGER.warn(String.format("[ W ] Exception during event handler: onPlayerAct. Malformed message?%n%s", t.toString()));
         }
 
@@ -121,7 +145,7 @@ public class GameEngineService {
         try {
             final GameRoom room = messageService.getRoom(client);
             this.endGame(room, client, EndGameReason.DISCONNECT);
-        } catch (Throwable t) {
+        } catch (NotFoundException t) {
             LOGGER.warn(String.format("[ W ] Exception during event handler: onClientDisconnected(). Is client without room disconnected?%n%s", t.toString()));
         }
 

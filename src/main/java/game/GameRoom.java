@@ -6,8 +6,6 @@ import game.services.GameCardService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -25,6 +23,7 @@ public class GameRoom {
 
     final GameCardService gameCardService;
     final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    GameField field=new GameField(new GameFieldRow[4]);
 
     //GAME VALUES
     private final short cardsInHandByPlayer; // количество кард у одного игрока в руке
@@ -129,5 +128,31 @@ public class GameRoom {
             rwLock.writeLock().unlock();
             throw e;
         }
+    }
+    public boolean placeCard(PlayingUser user, Long cardId, int row, int place) {
+        if (playerHands.containsKey(user)) {
+            int i=0;
+            boolean step =false;
+            while (i<(int) this.cardsInHandByPlayer) {
+                if (playerHands.get(user)[i]!= null && (int) playerHands.get(user)[i].getId()==cardId) {
+                    step=true;
+                    field.rows[row].putCardAt(place, playerHands.get(user)[i]);
+                    playerHands.get(user)[i]=null;
+                    i=(int) this.cardsInHandByPlayer;
+                }
+                i++;
+            }
+            return step;
+        }
+        else return false;
+    }
+    public GameField getCurrentField() {
+        return field;
+    }
+    public boolean activateBossCard(PlayingUser user) {
+        if (playerHands.containsKey(user)) {
+            return true;
+        }
+        else return false;
     }
 }

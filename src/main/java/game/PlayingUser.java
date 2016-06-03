@@ -14,6 +14,7 @@ import server.rest.UserServlet;
 public class PlayingUser {
     private User linkedUser;
     private int currentScore = 0;
+    private long currentRoom;
     private short lives = 0;
 
     @NotNull
@@ -41,5 +42,11 @@ public class PlayingUser {
 
     public String getName() {
         return linkedUser.getUsername();
+    }
+    public void setCurrentRoom(long roomId) {
+        this.currentRoom=roomId;
+    }
+    public long getCurrentRoom() {
+        return currentRoom;
     }
 }

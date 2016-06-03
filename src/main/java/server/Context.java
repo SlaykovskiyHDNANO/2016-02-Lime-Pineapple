@@ -15,7 +15,7 @@ public class Context {
         contextMap.put(aClass, object);
     }
 
-    @NotNull
+    //@NotNull
     public <T> T get(@NotNull Class<T> aClass){
         //noinspection unchecked
         return (T) contextMap.get(aClass);
