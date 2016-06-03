@@ -18,8 +18,8 @@
     <facet type="hibernate" name="Hibernate">
       <configuration>
         <datasource-map>
-          <unit-entry name="hibernate.cfg.xml" value="15f05fdb-31ab-4d01-82dc-ded1d8f9e662" />
-          <unit-entry name="hibernate.test.cfg.xml" />
+          <unit-entry name="hibernate.cfg.xml" value="6a866fdf-d112-4e38-bbfb-72c92e009a51" />
+          <unit-entry name="hibernate.test.cfg.xml" value="c1786540-64bb-4453-850d-b94644af24c6" />
         </datasource-map>
         <naming-strategy-map />
         <deploymentDescriptor name="hibernate.cfg.xml" url="file://$MODULE_DIR$/cfg/hibernate.cfg.xml" />
@@ -57,8 +57,9 @@
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-servlet:9.3.9.v20160517" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-security:9.3.9.v20160517" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-http:9.3.9.v20160517" level="project" />
-    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-servlets:9.3.9.v20160517" level="project" />
-    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-continuation:9.3.9.v20160517" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-servlets:8.1.19.v20160209" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-continuation:8.1.19.v20160209" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-client:8.1.19.v20160209" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-websocket:8.1.19.v20160209" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty.websocket:websocket-servlet:9.3.9.M1" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty.websocket:websocket-api:9.3.9.M1" level="project" />

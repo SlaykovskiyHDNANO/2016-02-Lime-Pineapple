@@ -151,6 +151,13 @@
             <version>${org.eclipse.jetty.websocket.version}</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlets</artifactId>
+            <version>${org.eclipse.jetty.websocket.version}</version>
+        </dependency>
+
         <!-- JETTY WEBSOCKETS -->
 
         <dependency>

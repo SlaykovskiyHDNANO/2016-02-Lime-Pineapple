@@ -21,7 +21,10 @@ public interface ICardEffect {
     @NotNull
     String getCardEffectType();
 
-    void activateCardEffect(CardModel linkedCard, PlayingUser cardUser, GameRoom cardOrigin );
+    void activateCardEffect(
+                            @NotNull Card linkedCard,
+                            @NotNull PlayingUser cardUser,
+                            @NotNull GameRoom room );
 
 
 }
