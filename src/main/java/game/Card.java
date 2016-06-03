@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * created: 6/1/2016
  * package: game
  */
-public abstract class Card implements CardEventHandler {
+public class Card {
 
     final CardModel model;
     final PlayingUser owner;

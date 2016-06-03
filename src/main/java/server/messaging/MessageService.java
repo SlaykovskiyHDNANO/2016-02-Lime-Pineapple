@@ -69,12 +69,12 @@ public class MessageService {
         }
     }
 
-    public void sendMessage(Client receiver, Message message) throws IOException {
+    public void sendMessage(@NotNull Client receiver, @NotNull Message message) throws IOException {
         final MessageSocket socket = clientToSockets.get(receiver);
         socket.sendMessage(message);
     }
 
-    public void sendMessage(GameRoom receiver, Message message) throws IOException {
+    public void sendMessage(@NotNull GameRoom receiver, @NotNull Message message) throws IOException {
         for (PlayingUser user : receiver.getUsers()) {
             try {
                 final MessageSocket socket = getSocket(user);
@@ -84,6 +84,12 @@ public class MessageService {
             }
         }
 
+    }
+
+
+    public void sendMessage(@NotNull  PlayingUser receiver, @NotNull Message message) throws IOException, NotFoundException {
+        final MessageSocket socket = getSocket(receiver);
+        socket.sendMessage(message);
     }
 
 
@@ -134,6 +140,8 @@ public class MessageService {
         }
         throw new NotFoundException("Could not find socket by given PlayingUser");
     }
+
+
 
     @NotNull
     public GameRoom getRoom(@NotNull Client client) throws NotFoundException {
