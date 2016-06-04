@@ -190,4 +190,7 @@ public class CardFactory {
 
         return model;
     }
-}
+    public CardModel[] getModels() {
+        return models;
+    }
+ }
