@@ -4,6 +4,8 @@ import javax.inject.Inject;
 import javax.persistence.Column;
 import javax.servlet.ServletContext;
 import javax.servlet.annotation.WebServlet;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.logging.log4j.LogManager;

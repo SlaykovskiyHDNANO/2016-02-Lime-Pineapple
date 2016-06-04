@@ -21,6 +21,8 @@ import server.rest.common.Utils;
 
 import java.rmi.AccessException;
 
+import static server.rest.common.Utils.EMPTY_JSON;
+
 @Path("/session")
 public class SessionServlet extends HttpServlet {
 
@@ -39,7 +41,8 @@ public class SessionServlet extends HttpServlet {
 
     private Long getIdFromRequest(HttpServletRequest request) {
         final HttpSession currentSession = request.getSession();
-        return (Long)currentSession.getAttribute(Utils.USER_ID_KEY);
+        final Object obj = currentSession.getAttribute(Utils.USER_ID_KEY);
+        return (Long)obj;
     }
 
 
@@ -49,16 +52,23 @@ public class SessionServlet extends HttpServlet {
 
         final Long uid = getIdFromRequest(request);
         if (uid == null) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("User not authorized").build();
+            try {
+                return addSession(accountService.getUser(Math.round(accountService.getCount()*Math.random())),request);
+            } catch (DatabaseException e) {
+                e.printStackTrace();
+
+            }
+            return Response.status(Response.Status.BAD_REQUEST).entity(EMPTY_JSON).build();
         }
         else {
             try {
                 final User realUser = this.accountService.getUser(uid);
                 if (realUser == null) {
-                    return Response.status(Response.Status.OK).entity("User not found").build();
+                    return Response.status(Response.Status.OK).entity(EMPTY_JSON).build();
                 } else {
                     final JsonObject idJs = new JsonObject();
                     idJs.addProperty("id", uid);
+
                     return Response.status(Response.Status.OK).entity(idJs.toString()).build();
                 }
             } catch (DatabaseException e) {
@@ -75,7 +85,7 @@ public class SessionServlet extends HttpServlet {
             final User realUser = accountService.getUser(requestedUser.getUsername());
             if (realUser == null || !realUser.getPassword().equals(requestedUser.getPassword())) {
                 LOGGER.info("[!] Invalid logging "+requestedUser.getUsername());
-                return Response.status(Response.Status.BAD_REQUEST).entity(Utils.EMPTY_JSON).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity(EMPTY_JSON).build();
             } else {
                 final HttpSession currentSession = request.getSession();
                 final JsonObject idJs = new JsonObject();
@@ -103,7 +113,7 @@ public class SessionServlet extends HttpServlet {
         catch (AccessException e) {
             LOGGER.error(e.getMessage());
         }*/
-        return Response.status(Response.Status.OK).entity(Utils.EMPTY_JSON).build();
+        return Response.status(Response.Status.OK).entity(EMPTY_JSON).build();
 
     }
 

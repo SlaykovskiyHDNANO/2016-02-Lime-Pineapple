@@ -18,10 +18,13 @@ import server.Context;
 import server.messaging.Client;
 import server.messaging.MessageService;
 
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import java.io.IOException;
 import java.net.HttpCookie;
 //import java.rmi.AccessException;
 import java.util.List;
+import java.util.Map;
 
 public class MessagingSocketCreator implements WebSocketCreator
 {
@@ -49,26 +52,23 @@ public class MessagingSocketCreator implements WebSocketCreator
             return null;
         }
 
-        final List<HttpCookie> cookies = req.getCookies();
+        final List<String> sessions = req.getServletParameters().get("session");
         LOGGER.info("[ I ] Getting authorization info");
-        for (HttpCookie cookie : cookies) {
+        for (String sessionStr : sessions) {
             // TODO: "id" label should be in settings or context
-            if ( cookie.getName().equals("JAVA")) {
-                final String value = cookie.getValue();
-                try {
-                    final Long id = Long.decode(value);
-                    final PlayingUser playingUser = new PlayingUser(accountService.getUser(id));
-                    final Client client = new Client(playingUser);
+            try {
+                final Long id = Long.decode(sessionStr);
+                final PlayingUser playingUser = new PlayingUser(accountService.getUser(id));
+                final Client client = new Client(playingUser);
 
-                    if (id > 0) {
-                        LOGGER.info("[ I ] WebSocket authorized. Getting user by id");
-                        return client;
-                    }
-                } catch (NumberFormatException e) {
-                    LOGGER.warn("[ I ] Error when trying to convert user id from cookie");
-                } catch (DatabaseException e) {
-                    LOGGER.warn("[ W ] Couldn't get user form cookie!");
+                if (id > 0) {
+                    LOGGER.info("[ I ] WebSocket authorized. Getting user by id");
+                    return client;
                 }
+            } catch (NumberFormatException e) {
+                LOGGER.warn("[ I ] Error when trying to convert user id from cookie");
+            } catch (DatabaseException e) {
+                LOGGER.warn("[ W ] Couldn't get user form cookie!");
             }
         }
         LOGGER.info("[ I ] WebSocket not authorized.");

@@ -37,8 +37,10 @@ import server.messaging.socket.MessagingServlet;
 //import javax.ws.rs.core.Application;
 //import java.io.FileInputStream;
 //import java.io.IOException;
+import javax.servlet.DispatcherType;
 import java.math.MathContext;
 import java.net.InetSocketAddress;
+import java.util.EnumSet;
 //import java.util.Properties;
 
 import static java.lang.Integer.parseInt;
@@ -102,6 +104,7 @@ public class Main {
         final InetSocketAddress addr = new InetSocketAddress(port);//не указывай адрес, если хочешь видимость по сети
         LOGGER.info("[ I ] Built successfully completed!");
         LOGGER.info(String.format("Address after configuration: http://%s:%d", address,port));
+
         return new Server(addr);
     }
 
@@ -110,6 +113,11 @@ public class Main {
         final ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         contextHandler.setContextPath("/");
         contextHandler.setAttribute(Context.CONTEXT_KEY,restContext);
+        final FilterHolder cors = contextHandler.addFilter(CrossOriginFilter.class,"/api/*", EnumSet.of(DispatcherType.REQUEST));
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
+        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "localhost");
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,POST,HEAD,PUT,DELETE");
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin");
         return contextHandler;
     }
 
@@ -117,8 +125,8 @@ public class Main {
     static ResourceHandler initializeResourceHandler() {
         // Static resource servlet
         final ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.setDirectoriesListed(true);
-        resourceHandler.setResourceBase("static");
+        //resourceHandler.setDirectoriesListed(true);
+        resourceHandler.setResourceBase("resources");
         return resourceHandler;
     }
 

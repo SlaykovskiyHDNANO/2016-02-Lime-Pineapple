@@ -30,8 +30,8 @@ public class MatchmakingService {
         public static final String LEAVE_ROOM_REQUEST = "Matchmaking.Room.Leave";
         public static final String JOIN_ROOM_REQUEST = "Matchmaking.Room.Join";
         public static final String LIST_ROOMS_REQUEST ="Matchmaking.List.Rooms";
-        public static final String PLAYER_READY = "";
-        public static final String JOIN_ROOM_RESPONSE = "Matchmaking.JoinRoom.Response";
+        public static final String PLAYER_READY = "Player.Ready";
+        public static final String JOIN_ROOM_RESPONSE = "Matchmaking.Room.Join.Response";
     }
 
     static final Logger LOGGER = LogManager.getLogger();
