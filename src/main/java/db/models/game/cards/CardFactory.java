@@ -32,7 +32,7 @@ public class CardFactory {
                 }
                 case 2: {
 
-                    model.cardName = "VOLKOLAK(LIDER)";
+                    model.cardName = "VOLKOLAK-LIDER";
                     model.setCharacters(CardType.BEAST, 10, true, false, false, false, 8);
                     return model;
                 }
@@ -48,13 +48,13 @@ public class CardFactory {
                     return model;
                 }
                 case 5: {
-                    model.cardName = "VOLKOLAK";
+                    model.cardName = "VOLKOLAK-LUCHNIK";
                     final boolean distant = new Random().nextBoolean();
                     model.setCharacters(CardType.BEAST, 10, !distant, false, distant, false, 6);
                     return model;
                 }
                 case 6: {
-                    model.cardName = "VOLKOLAK(SHAMAN)";
+                    model.cardName = "VOLKOLAK-SHAMAN";
                     model.setCharacters(CardType.BEAST, 10, false, false, true, false, 6);
                     return model;
                 }
@@ -64,7 +64,7 @@ public class CardFactory {
                     return model;
                 }
                 case 8: {
-                    model.cardName = "VOLKOLAK(BERSERK)";
+                    model.cardName = "VOLKOLAK-BERSERK";
                     model.setCharacters(CardType.BEAST, 10, true, false, false, false, 10);
                     return model;
                 }
