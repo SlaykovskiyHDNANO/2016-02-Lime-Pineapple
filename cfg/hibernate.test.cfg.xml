@@ -13,13 +13,13 @@
 
         <!-- Assume students is the database name -->
         <property name="hibernate.connection.url">
-            jdbc:mysql://127.0.0.1:3306/WHACKAMOLEUSERS?autoReconnect=true
+            jdbc:mysql://127.0.0.1:3306/tpjava_test?autoReconnect=true
         </property>
         <property name="hibernate.connection.username">
-            root
+            tpdb_admin
         </property>
         <property name="hibernate.connection.password">
-            yyvt9z3e
+            Lalka123
         </property>
 
         <property name="hbm2ddl.auto">

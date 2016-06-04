@@ -36,7 +36,7 @@ public class CardModel {
     @Column(name="cardType")
     CardType cardType;
     @Column(name="resourceType")
-    String resourceType;
+    String resourcePath;
 
     public void setCardType(CardType type) {this.cardType=type;}
 
@@ -60,8 +60,7 @@ public class CardModel {
 
     public void setCharacters(CardType type,
                               long lifetime,
-                              boolean playmelee, boolean enemymelee, boolean playdistant, boolean enemydistant, int strength,
-                              String resourcePath) {
+                              boolean playmelee, boolean enemymelee, boolean playdistant, boolean enemydistant, int strength) {
         this.cardType=type;
         this.cardEffects = new Vector<>();
         this.enemyCardContainerMelee=enemymelee;
@@ -70,6 +69,7 @@ public class CardModel {
         this.playersCardContainerMelee=playmelee;
         this.playersContainerBoss = type == CardType.BOSS;
         this.score =strength;
+        this.resourcePath= String.format("/resources/cards/%s", this.cardName.toLowerCase());
     }
 
     public int getScore() {
@@ -100,7 +100,7 @@ public class CardModel {
         return cardDescription;
     }
 
-    public String getResourceType() {
-        return resourceType;
+    public String getResourcePath() {
+        return resourcePath;
     }
 }

@@ -38,7 +38,7 @@ public class CardFactory {
                 }
                 case 3: {
 
-                    model.cardName = "BABA YAGA";
+                    model.cardName = "BABA_YAGA";
                     model.setCharacters(CardType.DAEMON, 10, true, false, true, false, 6);
                     return model;
                 }
@@ -54,17 +54,17 @@ public class CardFactory {
                     return model;
                 }
                 case 6: {
-                    model.cardName = "VOLKOLAK (SHAMAN)";
+                    model.cardName = "VOLKOLAK(SHAMAN)";
                     model.setCharacters(CardType.BEAST, 10, false, false, true, false, 6);
                     return model;
                 }
                 case 7: {
-                    model.cardName = "HEN AND CHICKEN";
+                    model.cardName = "HEN_AND_CHICKEN";
                     model.setCharacters(CardType.BEAST, 10, false, true, false, true, 1);
                     return model;
                 }
                 case 8: {
-                    model.cardName = "VOLKOLAK (BERSERK)";
+                    model.cardName = "VOLKOLAK(BERSERK)";
                     model.setCharacters(CardType.BEAST, 10, true, false, false, false, 10);
                     return model;
                 }
@@ -107,12 +107,12 @@ public class CardFactory {
                     return model;
                 }
                 case 16: {
-                    model.cardName = "VASILISYA PREKRASNAYA";
+                    model.cardName = "VASILISYA_PREKRASNAYA";
                     model.setCharacters(CardType.HUMAN, 10, false, false, true, false, 7);
                     return model;
                 }
                 case 17: {
-                    model.cardName = "MARIA MOREVNA";
+                    model.cardName = "MARIA_MOREVNA";
                     model.setCharacters(CardType.HUMAN, 10, true, false, false, false, 12);
                     return model;
                 }
@@ -127,7 +127,7 @@ public class CardFactory {
                     return model;
                 }
                 default: {
-                    model.cardName = "SESTRITSA ALENUSHKA BRATETS IVANUSHKA";
+                    model.cardName = "SESTRITSA_ALENUSHKA_BRATETS_IVANUSHKA";
                     model.setCharacters(CardType.HUMAN, 10, true, false, false, false, 10);
                     return model;
                 }
