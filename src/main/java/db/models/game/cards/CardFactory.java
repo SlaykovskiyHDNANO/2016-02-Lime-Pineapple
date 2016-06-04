@@ -173,10 +173,21 @@ public class CardFactory {
         }
 
     }
-    public Card createCard(int num,  PlayingUser owner) {
-        return new Card(models[num],count.incrementAndGet(), owner);
+    public CardModel getModel() {
+        return this.models[new Random().nextInt(20)];
     }
-    public BossCard createBoss() {
-        return new BossCard(new Random().nextBoolean());
+    public CardModel createBoss() {
+        final CardModel model=new CardModel();
+        if (new Random().nextBoolean()){
+            model.cardName="LESHUI";
+            model.addEffect(new EffectModel("Calls any 2 card sum power 15", "Forest spiritism", CardType.BOSS, "forestspiritism.gif"));
+        }
+        else {
+            model.cardName="FINIST (BOSS)";
+            model.addEffect(new EffectModel("Burns any card other cards lose 1 power", "Burning", CardType.BOSS, "burn.gif"));
+
+        }
+
+        return model;
     }
 }
