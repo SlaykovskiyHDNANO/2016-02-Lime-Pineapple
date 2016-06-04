@@ -19,21 +19,18 @@ public class CardModel {
 
     @Column(name="power")
     int power;
-    @Column(name="melle")
+    @Column(name="mellee")
     boolean playersCardContainerMelee=false;
-    @Column(name="enmelee")
+    @Column(name="enemyMelee")
     boolean enemyCardContainerMelee=false;
     @Column(name="distant")
     boolean playerCardContainerDistant=false;
-    @Column(name="endistant")
+    @Column(name="enemyDistant")
     boolean enemyCardContainerDistant=false;
-
     @Column
     String cardDescription;
-
     @OneToMany()
     Collection<EffectModel> cardEffects;
-
     @Column(name="cardType")
     CardType cardType;
 

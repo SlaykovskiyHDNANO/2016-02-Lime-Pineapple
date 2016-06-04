@@ -3,31 +3,26 @@ package game.services;
 import db.models.game.cards.CardFactory;
 import db.models.game.cards.CardModel;
 import db.models.game.cards.CardType;
-import db.services.CardService;
 import game.Card;
-import game.ICardEffect;
 import game.PlayingUser;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * created: 6/1/2016
  * package: game.services
  */
 public class GameCardService {
-    CardFactory factory=new CardFactory();
     final Map<CardType, CardModel> typesToCards = new ConcurrentHashMap<>();
     final Map<String, CardModel> namesToCards = new ConcurrentHashMap<>();
-    final CardService cardService;
-    final AtomicLong cardIdIncrement = new AtomicLong(0L);
+    final CardFactory cardFactory;
+    final AtomicInteger cardIdIncrement = new AtomicInteger(0);
 
-    public GameCardService(@NotNull CardService service) {
-        this.cardService = service;
+    public GameCardService(@NotNull CardFactory service) {
+        this.cardFactory = service;
     }
 
 
@@ -48,7 +43,8 @@ public class GameCardService {
 
 
     protected Card makeCard(@NotNull CardModel model, @NotNull PlayingUser owner) {
-        // TODO: make card
+        final int id = cardIdIncrement.incrementAndGet();
+        return new Card(model, id, owner);
     }
 
     public Card makeRandomCard(@NotNull PlayingUser owner) {
@@ -66,5 +62,10 @@ public class GameCardService {
         final CardModel model = namesToCards.get(name);
         return this.makeCard(model, owner);
     }
+
+    public CardModel[] getModels() {
+        return this.cardFactory.getModels();
+    }
+
 
 }

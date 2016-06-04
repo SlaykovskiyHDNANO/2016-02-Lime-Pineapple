@@ -1,10 +1,14 @@
 package main;
 
+import db.models.game.cards.CardFactory;
 import db.services.AccountService;
+import db.services.CardService;
 import db.services.impl.db.AccountDAO;
 import db.services.impl.db.DBAccountServiceImpl;
 import db.services.impl.db.DBSessionFactoryService;
+import game.services.GameCardService;
 import game.services.GameEngineService;
+import game.services.MatchmakingService;
 import game.services.messages.GameMessageDeserializer;
 import server.messaging.MessageService;
 import org.apache.commons.configuration2.Configuration;
@@ -32,6 +36,7 @@ import server.messaging.socket.MessagingServlet;
 //import javax.ws.rs.core.Application;
 //import java.io.FileInputStream;
 //import java.io.IOException;
+import java.math.MathContext;
 import java.net.InetSocketAddress;
 //import java.util.Properties;
 
@@ -141,8 +146,13 @@ public class Main {
                               @NotNull AccountService accountService) {
         final MessageService messageService = new MessageService();
         serverContext.put(MessageService.class, messageService);
+
         final GameMessageDeserializer gameMessageDeserializer = new GameMessageDeserializer();
         final GameEngineService gameServer = new GameEngineService(gameMessageDeserializer, messageService, accountService);
+        gameServer.configure();
+        final GameCardService gameCardService = new GameCardService(new CardFactory());
+        final MatchmakingService matchmakingService = new MatchmakingService(gameCardService, messageService);
+        matchmakingService.configure();
         final ServletHolder holderSockets = new ServletHolder("ws-events", MessagingServlet.class);
         contextHandler.addServlet(holderSockets, "/sockets/*");
     }

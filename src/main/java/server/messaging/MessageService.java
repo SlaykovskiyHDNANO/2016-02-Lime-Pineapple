@@ -27,6 +27,8 @@ public class MessageService {
     final Map<Long, Client> idToClients = new ConcurrentHashMap<>();
     final Map<Client, MessageSocket> clientToSockets = new ConcurrentHashMap<>();
 
+    final List<OnNewActiveRoomCallback> activeRoomCallbacks = Collections.synchronizedList(new ArrayList<>());
+
     // games that actually running
     final List<GameRoom> activeRooms = Collections.synchronizedList(new ArrayList<>());
 
@@ -95,6 +97,12 @@ public class MessageService {
 
     // CLIENT AND ROOMS MANAGEMENT
 
+    // ON NEW ACTIVE ROOM
+
+    public void onNewActiveRoom(@NotNull OnNewActiveRoomCallback callback) {
+        this.activeRoomCallbacks.add(callback);
+    }
+
     protected void removeRoom(@NotNull GameRoom room) {
         this.activeRooms.remove(room);
     }
@@ -123,6 +131,9 @@ public class MessageService {
 
     public void addActiveRoom(@NotNull GameRoom room) {
         this.activeRooms.add(room);
+        for(OnNewActiveRoomCallback callback : this.activeRoomCallbacks) {
+            new OnActiveRoomCallbackFiber(callback, room).start();
+        }
     }
 
     // CLIENT AND ROOMS GETTERS
@@ -175,6 +186,22 @@ public class MessageService {
         @Override
         protected Void run() throws SuspendExecution, InterruptedException {
             callback.callback(sender, message);
+            return null;
+        }
+    }
+
+    protected static class OnActiveRoomCallbackFiber extends Fiber<Void> {
+        private final OnNewActiveRoomCallback callback;
+        private final GameRoom room;
+
+        public OnActiveRoomCallbackFiber(OnNewActiveRoomCallback callback, GameRoom room) {
+            this.callback = callback;
+            this.room = room;
+        }
+
+        @Override
+        protected Void run() throws SuspendExecution, InterruptedException {
+            callback.run(room);
             return null;
         }
     }

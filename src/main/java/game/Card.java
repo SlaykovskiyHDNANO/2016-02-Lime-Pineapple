@@ -1,7 +1,6 @@
 package game;
 
 import db.models.game.cards.CardModel;
-import game.services.CardEventHandler;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -33,4 +32,6 @@ public class Card {
         this.id = id;
         this.owner = owner;
     }
+
+
 }

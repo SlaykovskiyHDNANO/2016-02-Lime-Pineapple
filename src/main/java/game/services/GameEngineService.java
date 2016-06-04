@@ -3,12 +3,16 @@ package game.services;
 import com.google.gson.Gson;
 import db.exceptions.DatabaseException;
 import db.models.User;
+import db.models.game.cards.CardType;
 import db.services.AccountService;
+import game.Card;
+import game.GameField;
 import game.GameRoom;
 import game.PlayingUser;
 import game.services.messages.EndGameMessageResponse;
 import game.services.messages.GameMessageDeserializer;
 import game.services.messages.PlayerActMessage;
+import game.services.messages.PlayerActResponseMessage;
 import javassist.NotFoundException;
 import server.messaging.Message;
 import server.messaging.MessageType;
@@ -20,6 +24,8 @@ import server.messaging.Client;
 import server.messaging.MessageService;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * created: 5/25/2016
@@ -27,17 +33,24 @@ import java.io.IOException;
  */
 public class GameEngineService {
     public static final String SKIP_MESSAGE="Game.PlayerAct.Response.Skipped";
+
     static final Logger LOGGER = LogManager.getLogger();
     final MessageService messageService;
     final AccountService accountService;
     final GameMessageDeserializer deserializer;
+    final GameCardService gameCardService;
+    private final GameFieldFactoryService gameFieldFactoryService;
 
     public GameEngineService(@NotNull GameMessageDeserializer deserializer,
                       @NotNull MessageService messageService,
-                      @NotNull AccountService accountService) {
+                      @NotNull AccountService accountService,
+                             @NotNull GameCardService gameCardService,
+                             @NotNull GameFieldFactoryService gameFieldFactoryService) {
         this.messageService = messageService;
         this.accountService = accountService;
         this.deserializer = deserializer;
+        this.gameCardService = gameCardService;
+        this.gameFieldFactoryService = gameFieldFactoryService;
     }
 
     // Конфигурирует сервис: запускает слушатели событий на сервисе сообщений
@@ -48,6 +61,22 @@ public class GameEngineService {
         this.messageService.subscribe(PlayerActMessage.MESSAGE_NAME, (client, message) -> {
             final PlayerActMessage gm = (PlayerActMessage) deserializer.deserialize(message);
             this.onPlayerAct(client, gm);
+        });
+        this.messageService.onNewActiveRoom((room) -> {
+            // initialize room
+            final PlayingUser[] users = (PlayingUser[]) room.getUsers().toArray();
+            final Map<PlayingUser, Card[]> hands = new ConcurrentHashMap<>();
+            final GameField gameField = gameFieldFactoryService.makeField(users);
+            for (PlayingUser user : users ){
+                hands.put(user,this.gameCardService.makeHand(room.getCardsInHandByPlayer(), user));
+            }
+            room.initializeWithGameValues(hands, gameField );
+            final int firstPlayer = (int) (Math.round(Math.random()*users.length))-1;
+            try {
+                this.messageService.sendMessage(users[firstPlayer], new PlayerActResponseMessage(true));
+            } catch (Throwable t) {
+                LOGGER.warn(String.format("[ W ] Exception during sending message of first player to client:%n%s", t.toString()));
+            }
         });
     }
 
@@ -110,27 +139,29 @@ public class GameEngineService {
             }
             catch (IOException e) {
                 System.out.println(e.getMessage());// обрабатываем действия юзера
+            } catch (NotFoundException e) {
+                e.printStackTrace();
             }
         }
         else if (actData.activatedBossCard) {
-            room.activateBossCard(actor);
-            try {
-                if (room.activateBossCard(actor)) {
-                    this.messageService.sendMessage(room,  new Message(MessageType.GAME,messInfo.toJson(room.getHand(actor))));
-                }
-                this.messageService.sendMessage(room, new Message(MessageType.GAME,messInfo.toJson(room.getCurrentField())));
-            } catch (IOException e) {
-                System.out.println(e.getMessage());// обрабатываем действия юзера
-            }
+            //room.activateBossCard(actor);
+            //try {
+            //    if (room.activateBossCard(actor)) {
+            //        this.messageService.sendMessage(room,  new Message(MessageType.GAME,messInfo.toJson(room.getHand(actor))));
+            //    }
+            //    this.messageService.sendMessage(room, new Message(MessageType.GAME,messInfo.toJson(room.getCurrentField())));
+            //} catch (IOException e) {
+            //    System.out.println(e.getMessage());// обрабатываем действия юзера
+            //}
         }
         else {
-            room.placeCard(actor, actData.playerCardId, actData.rowIndex, actData.columnIndex);
-            try {
-
-                this.messageService.sendMessage(room, new Message(MessageType.GAME, messInfo.toJson(room.getCurrentField())));
-            } catch (IOException e) {
-                System.out.println(e.getMessage());// обрабатываем действия юзера
-            }
+            //room.placeCard(actor, actData.playerCardId, actData.rowIndex, actData.columnIndex);
+            //try {
+//
+            //    this.messageService.sendMessage(room, new Message(MessageType.GAME, messInfo.toJson(room.getCurrentField())));
+            //} catch (IOException e) {
+            //    System.out.println(e.getMessage());// обрабатываем действия юзера
+            //}
         }
         // ToDo доделать сообщения на юзера
         // действия юзера - активировал карту босса, поставил карту на поле, пропустил ход.

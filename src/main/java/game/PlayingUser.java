@@ -2,8 +2,6 @@ package game;
 
 import db.models.User;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import server.rest.UserServlet;
 
 /**
  * created: 12-Mar-16
@@ -14,7 +12,7 @@ import server.rest.UserServlet;
 public class PlayingUser {
     private User linkedUser;
     private int currentScore = 0;
-    private long currentRoom;
+    private long currentRoomId;
     private boolean skipped=false;
 
     public boolean isSkipped() {
@@ -65,10 +63,10 @@ public class PlayingUser {
     public String getName() {
         return linkedUser.getUsername();
     }
-    public void setCurrentRoom(long roomId) {
-        this.currentRoom=roomId;
+    public void setCurrentRoomId(long roomId) {
+        this.currentRoomId =roomId;
     }
-    public long getCurrentRoom() {
-        return currentRoom;
+    public long getCurrentRoomId() {
+        return currentRoomId;
     }
 }

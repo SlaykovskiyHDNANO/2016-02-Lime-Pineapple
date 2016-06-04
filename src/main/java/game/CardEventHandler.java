@@ -1,4 +1,4 @@
-package game.services;
+package game;
 
 import game.GameRoom;
 import game.PlayingUser;

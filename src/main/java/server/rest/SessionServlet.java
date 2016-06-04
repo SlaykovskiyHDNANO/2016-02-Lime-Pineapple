@@ -58,7 +58,7 @@ public class SessionServlet extends HttpServlet {
                     return Response.status(Response.Status.OK).entity("User not found").build();
                 } else {
                     final JsonObject idJs = new JsonObject();
-                    idJs.addProperty("id", 1L);
+                    idJs.addProperty("id", uid);
                     return Response.status(Response.Status.OK).entity(idJs.toString()).build();
                 }
             } catch (DatabaseException e) {

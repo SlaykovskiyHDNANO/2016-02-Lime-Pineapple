@@ -54,6 +54,7 @@ public class Message implements Serializable {
         this.name = message.name;
     }
 
+
     @Nullable
     public JsonElement serializeData() {
         return null;

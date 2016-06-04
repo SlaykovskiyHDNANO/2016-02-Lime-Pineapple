@@ -8,5 +8,6 @@ public enum MessageType {
     BACKBONE,
     GAME,
     MATCHMAKING,
+    RESOURCES,
     SYSTEM,
 }

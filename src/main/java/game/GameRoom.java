@@ -1,7 +1,9 @@
 package game;
 
 import db.models.User;
+import game.exceptions.GameException;
 import game.services.GameCardService;
+import game.services.GameFieldFactoryService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -20,16 +22,14 @@ public class GameRoom {
     RoomStatus roomStatus = RoomStatus.LOOKING_FOR_PEOPLE;
     final PlayingUser[] users = new PlayingUser[2];
 
-    final GameCardService gameCardService;
+    // INNER STATE
     final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    GameField field=new GameField(new GameFieldRow[4]);
-    boolean eviluser;
 
     //GAME VALUES
-    private final short cardsInHandByPlayer; // количество кард у одного игрока в руке
+    final short cardsInHandByPlayer; // количество кард у одного игрока в руке
 
-    private final Map<PlayingUser, Card[]> playerHands = new ConcurrentHashMap<>(); // карты в руке игрока
-    //private final Map<PlayingUser, BossCard> bossCards=new ConcurrentHashMap<>();
+    GameField field   = null;
+    Map<PlayingUser, Card[]> playerHands = null; // карты в руке игрока
 
 
     @NotNull
@@ -45,47 +45,35 @@ public class GameRoom {
         return id;
     }
 
-    public GameRoom(@NotNull GameCardService gameCardService, long id, short totalHandCards) {
+    public GameRoom(long id, short totalHandCards) {
         this.id = id;
         this.cardsInHandByPlayer = totalHandCards;
-        this.gameCardService = gameCardService;
-        eviluser=false;
     }
 
     public short getCardsInHandByPlayer() {
         return cardsInHandByPlayer;
     }
 
-    public void addUser(@NotNull PlayingUser user) {
+    public void addUser(@NotNull PlayingUser user) throws GameException {
         rwLock.writeLock().lock();
-        try {
-            if (users[0]==null) {
-                users[0]=user;
-                playerHands.put(users[0], gameCardService.makeHand((short) 12, eviluser));
-                users[0].setCurrentRoom(this.getId());
-                field.setBoss(users[0],new BossCard(eviluser));
-                eviluser=!eviluser;
-                if (users[1]!=null) setRoomStatus(RoomStatus.GAME_PHASE);
-                else setRoomStatus(RoomStatus.LOOKING_FOR_PEOPLE);
-            }
-            else {
-                if (users[1]!=null) {
-                    users[1]=user;
-                    playerHands.put(users[1], gameCardService.makeHand((short) 12, eviluser));
-                    users[1].setCurrentRoom(this.getId());
-                    field.setBoss(users[1],new BossCard(eviluser));
-                    eviluser=!eviluser;
-                    if (users[0]!=null) setRoomStatus(RoomStatus.GAME_PHASE);
-                    else setRoomStatus(RoomStatus.LOOKING_FOR_PEOPLE);
-                }
+        for (int i = 0, s = this.users.length; i<s; ++i) {
+            if (this.users[i] == null) {
+                this.users[i] = user;
             }
         }
-        catch(Throwable t) {
-            LOGGER.warn(String.format("Exception during adding user into room.%n%s", t.toString()));
-            rwLock.writeLock().unlock();
-        }
-
+        throw new GameException("Room is full");
     }
+
+    // USE THIS AFTER TWO PLAYERS HAVE STARTED THE GAME
+    public synchronized void initializeWithGameValues(@NotNull Map<PlayingUser, Card[]> hands,
+                                                      @NotNull GameField gameField) {
+        // check two fields
+        this.playerHands = hands;
+        this.field = gameField;
+    }
+
+
+
 
     @NotNull
     public Card[] getHand(PlayingUser user) {
@@ -142,32 +130,9 @@ public class GameRoom {
             throw e;
         }
     }
-    public boolean placeCard(PlayingUser user, Long cardId, int row, int place) {
-        if (playerHands.containsKey(user)) {
-            int i=0;
-            boolean step =false;
-            while (i<(int) this.cardsInHandByPlayer) {
-                if (playerHands.get(user)[i]!= null && (int) playerHands.get(user)[i].getId()==cardId) {
-                    step=true;
-                    field.rows[row].putCardAt(place, playerHands.get(user)[i]);
-                    playerHands.get(user)[i]=null;
-                    i=(int) this.cardsInHandByPlayer;
-                }
-                i++;
-            }
-            return step;
-        }
-        else return false;
-    }
-    public void setField(GameField field1) {this.field=field1;}
+
     public GameField getCurrentField() {
         return field;
-    }
-    public boolean activateBossCard(PlayingUser user) {
-        if (playerHands.containsKey(user)) {
-            return field.getBoss(user).activate();
-        }
-        else return false;
     }
 
 }
