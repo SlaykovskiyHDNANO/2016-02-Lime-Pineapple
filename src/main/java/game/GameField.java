@@ -1,14 +1,12 @@
 package game;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import game.exceptions.GameException;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -17,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
  * package: game
  */
 public class GameField {
+
+
     public enum FieldType {
         MELEE,
         RANGED
@@ -24,9 +24,18 @@ public class GameField {
 
     private static Gson gson = new Gson();
 
-    final Map<PlayingUser, Card> bosses;
-    final Map<PlayingUser, GameFieldRow[]> playerToRows;
+    Map<PlayingUser, Card> bosses;
+    Map<PlayingUser, GameFieldRow[]> playerToRows;
 
+    public static class TranslatedPosition {
+        public final int rowIndex;
+        public final PlayingUser user;
+
+        TranslatedPosition(int rowIndex, PlayingUser user) {
+            this.rowIndex = rowIndex;
+            this.user = user;
+        }
+    }
 
     public GameField(
                           @NotNull Map<PlayingUser, GameFieldRow[]> rows,
@@ -48,12 +57,36 @@ public class GameField {
     }
 
     @NotNull
+    protected PlayingUser getAnotherPlayer(@NotNull PlayingUser thisPlayer) throws GameException {
+        for (PlayingUser user : this.playerToRows.keySet()) {
+            if (!Objects.equals(user, thisPlayer)) {
+                return user;
+            }
+        }
+        throw new GameException("Could not find another user. Every user in room equals this user!");
+    }
+
+    public TranslatedPosition translateRowIndexToRowOwner(@NotNull  PlayingUser userPerspective, int rowIndex) throws GameException {
+        final int rowsPerUser = this.playerToRows.get(userPerspective).length;
+        if (rowIndex >= rowsPerUser) {
+            return new TranslatedPosition(rowIndex % rowsPerUser, userPerspective);
+        } else {
+
+            return new TranslatedPosition( (rowIndex + 1) % rowsPerUser, this.getAnotherPlayer(userPerspective));
+        }
+    }
+
+    public void putCard( @NotNull Card card, @NotNull TranslatedPosition position,  @NotNull Integer columnIndex) {
+        this.playerToRows.get(position.user)[position.rowIndex].putCardAt(columnIndex, card);
+    }
+
+    /*@NotNull
     public JsonObject serializeRoom() {
         final JsonObject jsonObject = new JsonObject();
         final JsonElement bossesArr = gson.toJsonTree(bosses.values().toArray());
         jsonObject.add("bosses", bossesArr);
 
         return jsonObject;
-    }
+    }*/
 
 }

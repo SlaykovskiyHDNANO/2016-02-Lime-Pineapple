@@ -1,10 +1,14 @@
 package game.services.messages;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import server.messaging.Message;
 import server.messaging.MessageDeserializer;
+import server.messaging.MessageType;
 
 /**
  * created: 6/1/2016
@@ -15,8 +19,13 @@ public class PlayerActMessage extends Message {
 
     final PlayerActData data;
 
-    PlayerActMessage(Message message, PlayerActData data) {
+    public PlayerActMessage(Message message, PlayerActData data) {
         super(message);
+        this.data = data;
+    }
+
+    public PlayerActMessage(@NotNull String name, @NotNull PlayerActData data) {
+        super(MessageType.GAME, name);
         this.data = data;
     }
 
@@ -55,6 +64,16 @@ public class PlayerActMessage extends Message {
     }
 
 
-
-
+    @Nullable
+    @Override
+    public JsonElement serializeData() {
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("playerCardId", this.data.placedCard);
+        jsonObject.addProperty("rowIndex", this.data.rowIndex);
+        jsonObject.addProperty("columnIndex", this.data.columnIndex);
+        jsonObject.addProperty("activatedBossCard", this.data.activatedBossCard);
+        jsonObject.addProperty("skippedTurn", this.data.skippedTurn);
+        jsonObject.addProperty("placedCard",this.data.placedCard);
+        return jsonObject;
+    }
 }

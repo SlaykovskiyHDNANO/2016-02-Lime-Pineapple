@@ -29,7 +29,7 @@ public class GameRoom {
     final short cardsInHandByPlayer; // количество кард у одного игрока в руке
 
     GameField field   = null;
-    Map<PlayingUser, Card[]> playerHands = null; // карты в руке игрока
+    Map<PlayingUser, List<Card>> playerHands = null; // карты в руке игрока
 
 
     @NotNull
@@ -65,7 +65,7 @@ public class GameRoom {
     }
 
     // USE THIS AFTER TWO PLAYERS HAVE STARTED THE GAME
-    public synchronized void initializeWithGameValues(@NotNull Map<PlayingUser, Card[]> hands,
+    public synchronized void initializeWithGameValues(@NotNull Map<PlayingUser, List<Card>> hands,
                                                       @NotNull GameField gameField) {
         // check two fields
         this.playerHands = hands;
@@ -76,12 +76,12 @@ public class GameRoom {
 
 
     @NotNull
-    public Card[] getHand(PlayingUser user) {
+    public List<Card> getHand(PlayingUser user) {
         return this.playerHands.get(user);
     }
 
     @NotNull
-    public Set<Map.Entry<PlayingUser, Card[]>> getPlayerHands() {
+    public Set<Map.Entry<PlayingUser, List<Card>>> getPlayerHands() {
         return this.playerHands.entrySet();
     }
 
@@ -135,4 +135,15 @@ public class GameRoom {
         return field;
     }
 
+    public synchronized Card popCardFromHand(@NotNull PlayingUser actor, @NotNull Integer playerCardId) throws GameException {
+        final List<Card> hand = this.playerHands.get(actor);
+        for (int i = 0, s = hand.size(); i<s; ++i) {
+            final Card card = hand.get(i);
+            if (Objects.equals(card.id, playerCardId)) {
+                hand.remove(i);
+                return card;
+            }
+        }
+        throw new GameException("Card with this id not found. Is this is valid user for a card?");
+    }
 }

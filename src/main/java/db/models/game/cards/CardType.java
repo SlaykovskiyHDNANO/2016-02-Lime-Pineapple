@@ -8,14 +8,13 @@ import org.jetbrains.annotations.NotNull;
  */
 public enum CardType {
     NONE("Cards.NONE"),
-    BOSS_CARD("Catds.Boss"),
     ONE_TIME_USE("Cards.Modifier"),
     HUMAN("Cards.Living.Humanoid.Human"),
     BEAST("Cards.Living.Creature.Beast"),
     MONSTER("Cards.Living.Creature.Monster"),
     DAEMON("Cards.Living.Spiritual.Daemon"),
     SPIRIT("Cards.Living.Spiritual.Spirit"),
-    BOSS("Cards.Special");
+    BOSS("Cards.Boss");
 
 
     private final String cardName;

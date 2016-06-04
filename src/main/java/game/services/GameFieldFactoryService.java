@@ -34,7 +34,7 @@ public class GameFieldFactoryService {
         final Map<PlayingUser, Card> bosses = new ConcurrentHashMap<>();
         for (PlayingUser user : users) {
             userToRows.put(user, buildRows());
-            bosses.put(user, this.gameCardService.makeCard(CardType.BOSS_CARD, user));
+            bosses.put(user, this.gameCardService.makeCard(CardType.BOSS, user));
         }
         return new GameField(userToRows, bosses);
     }

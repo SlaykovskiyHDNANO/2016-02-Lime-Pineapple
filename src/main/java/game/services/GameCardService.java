@@ -7,6 +7,8 @@ import game.Card;
 import game.PlayingUser;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,10 +35,10 @@ public class GameCardService {
     }
 
     @NotNull
-    public Card[] makeHand(short handSize, @NotNull PlayingUser owner) {
-        final Card[] cards = new Card[handSize];
+    public List<Card> makeHand(short handSize, @NotNull PlayingUser owner) {
+        final List<Card> cards = new ArrayList<Card>();
         for (int i = 0; i<handSize; ++i) {
-            cards[i] = makeRandomCard(owner);
+            cards.add(makeRandomCard(owner));
         }
         return cards;
     }

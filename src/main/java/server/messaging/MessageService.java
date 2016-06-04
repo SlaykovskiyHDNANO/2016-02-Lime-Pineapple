@@ -4,6 +4,8 @@ import co.paralleluniverse.fibers.Fiber;
 import co.paralleluniverse.fibers.SuspendExecution;
 import game.GameRoom;
 import game.PlayingUser;
+import game.services.messages.EndGameMessageResponse;
+import game.services.messages.PlayerActResponseMessage;
 import javassist.NotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -168,6 +170,24 @@ public class MessageService {
         LOGGER.warn("[ W ] Not found room for client. Is he playing?");
         throw new NotFoundException("Room not found");
 
+    }
+
+    public void trySendMessage(@NotNull GameRoom room, @NotNull Message endGameMessageResponse) {
+        try {
+            this.sendMessage(room, endGameMessageResponse);
+        } catch(IOException e) {
+            LOGGER.warn(String.format("[ W ] Error sending message:%n%s", e.toString()));
+        }
+    }
+
+    public void trySendMessage(@NotNull PlayingUser actor, @NotNull Message message) {
+        try {
+            this.sendMessage(actor, message);
+        } catch(IOException e) {
+            LOGGER.warn(String.format("[ W ] Error sending message:%n%s", e.toString()));
+        } catch (NotFoundException e) {
+            LOGGER.warn(String.format("[ W ] Error: user not found:%n%s", e.toString()));
+        }
     }
 
     // -- CallbackFiber - multithreaded callback handler

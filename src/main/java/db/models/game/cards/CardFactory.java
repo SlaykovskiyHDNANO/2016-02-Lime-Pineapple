@@ -1,6 +1,5 @@
 package db.models.game.cards;
 
-import game.BossCard;
 import game.Card;
 import game.PlayingUser;
 import org.jetbrains.annotations.Nullable;
@@ -176,7 +175,7 @@ public class CardFactory {
     public CardModel getModel() {
         return this.models[new Random().nextInt(20)];
     }
-    public CardModel createBoss() {
+    public CardModel getBossModel() {
         final CardModel model=new CardModel();
         if (new Random().nextBoolean()){
             model.cardName="LESHUI";

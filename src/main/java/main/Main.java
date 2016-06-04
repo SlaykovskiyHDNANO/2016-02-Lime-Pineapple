@@ -8,6 +8,7 @@ import db.services.impl.db.DBAccountServiceImpl;
 import db.services.impl.db.DBSessionFactoryService;
 import game.services.GameCardService;
 import game.services.GameEngineService;
+import game.services.GameFieldFactoryService;
 import game.services.MatchmakingService;
 import game.services.messages.GameMessageDeserializer;
 import server.messaging.MessageService;
@@ -148,9 +149,10 @@ public class Main {
         serverContext.put(MessageService.class, messageService);
 
         final GameMessageDeserializer gameMessageDeserializer = new GameMessageDeserializer();
-        final GameEngineService gameServer = new GameEngineService(gameMessageDeserializer, messageService, accountService);
-        gameServer.configure();
         final GameCardService gameCardService = new GameCardService(new CardFactory());
+        final GameFieldFactoryService gameFieldFactoryService = new GameFieldFactoryService(gameCardService);
+        final GameEngineService gameServer = new GameEngineService(gameMessageDeserializer, messageService, accountService, gameCardService, gameFieldFactoryService);
+        gameServer.configure();
         final MatchmakingService matchmakingService = new MatchmakingService(gameCardService, messageService);
         matchmakingService.configure();
         final ServletHolder holderSockets = new ServletHolder("ws-events", MessagingServlet.class);

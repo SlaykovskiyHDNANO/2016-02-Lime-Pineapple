@@ -3,12 +3,12 @@ package game.services;
 import com.google.gson.Gson;
 import db.exceptions.DatabaseException;
 import db.models.User;
-import db.models.game.cards.CardType;
 import db.services.AccountService;
 import game.Card;
 import game.GameField;
 import game.GameRoom;
 import game.PlayingUser;
+import game.exceptions.GameException;
 import game.services.messages.EndGameMessageResponse;
 import game.services.messages.GameMessageDeserializer;
 import game.services.messages.PlayerActMessage;
@@ -24,6 +24,7 @@ import server.messaging.Client;
 import server.messaging.MessageService;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,6 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class GameEngineService {
     public static final String SKIP_MESSAGE="Game.PlayerAct.Response.Skipped";
+    public static final String FIRST_PLAYER = "Game.Player.First";
+    private static final String PLAYER_ACT_ENEMY_ACTED = "Game.Player.Enemy.Acted";
 
     static final Logger LOGGER = LogManager.getLogger();
     final MessageService messageService;
@@ -65,7 +68,7 @@ public class GameEngineService {
         this.messageService.onNewActiveRoom((room) -> {
             // initialize room
             final PlayingUser[] users = (PlayingUser[]) room.getUsers().toArray();
-            final Map<PlayingUser, Card[]> hands = new ConcurrentHashMap<>();
+            final Map<PlayingUser, List<Card>> hands = new ConcurrentHashMap<>();
             final GameField gameField = gameFieldFactoryService.makeField(users);
             for (PlayingUser user : users ){
                 hands.put(user,this.gameCardService.makeHand(room.getCardsInHandByPlayer(), user));
@@ -73,7 +76,7 @@ public class GameEngineService {
             room.initializeWithGameValues(hands, gameField );
             final int firstPlayer = (int) (Math.round(Math.random()*users.length))-1;
             try {
-                this.messageService.sendMessage(users[firstPlayer], new PlayerActResponseMessage(true));
+                this.messageService.sendMessage(users[firstPlayer], new Message(MessageType.GAME, FIRST_PLAYER));
             } catch (Throwable t) {
                 LOGGER.warn(String.format("[ W ] Exception during sending message of first player to client:%n%s", t.toString()));
             }
@@ -88,7 +91,7 @@ public class GameEngineService {
     // ENGINE LOGIC GAME
 
 
-    void endGame(@NotNull GameRoom room,@NotNull PlayingUser winnerClient,@NotNull EndGameReason reason) {
+    void endGame(@NotNull GameRoom room, @NotNull PlayingUser winnerClient, @NotNull EndGameReason reason) {
         final PlayingUser winner = winnerClient;
         final PlayingUser loser = room.getAnotherPlayer(winnerClient);
         final User winnerUser = winner.getLinkedUser();
@@ -119,8 +122,8 @@ public class GameEngineService {
                     }
                     this.messageService.sendMessage(room, new EndGameMessageResponse(winnerUser, reason));
                     break;
-                case JUST_BECAUSE:
-                    LOGGER.warn("[ W ] Wow, end game reason is just because?");
+                default:
+                    LOGGER.warn("[ W ] Wow, end game reason is default?");
                     this.messageService.sendMessage(room, new EndGameMessageResponse(null, reason));
                     break;
             }
@@ -130,18 +133,45 @@ public class GameEngineService {
 
     }
 
-    void endRound(GameRoom room) {
-        if (room.getUser(0).getCurrentScore()>=room.getUser(1).getCurrentScore()) {
-            room.getUser(0).setLives((short)(room.getUser(0).getLives()-1));
-            room.getUser(0).setSkipped(false);
-            if (room.getUser(0).getLives()==0) endGame(room, room.getUser(1), EndGameReason.WE_HAVE_A_WINNER);
+    void endAsStalemate(@NotNull GameRoom room, @NotNull EndGameReason reason) {
+        for (PlayingUser user : room.getUsers()) {
+            try {
+                this.accountService.updateUserStats(user.getLinkedUser(), user.getCurrentScore());
+            } catch (DatabaseException e) {
+                LOGGER.warn(String.format("[ W ] Error saving model: %n%s", e.toString()));
+            }
         }
-        else {
-            room.getUser(1).setLives((short)(room.getUser(1).getLives()-1));
-            room.getUser(1).setSkipped(false);
-            if (room.getUser(1).getLives()==0) endGame(room, room.getUser(0), EndGameReason.WE_HAVE_A_WINNER);
-        }
+        this.messageService.trySendMessage(room, new EndGameMessageResponse(null, reason));
+    }
 
+
+
+    int winIndex(PlayingUser[] users) {
+        int bestScore = users[0].getCurrentScore();
+        int winner = 0;
+        for (int i = 1, s = users.length; i<s; ++i) {
+            final int us = users[i].getCurrentScore();
+            if( us > bestScore) {
+                winner = i;
+                bestScore = us;
+            } else if(us == bestScore) {
+                winner = -1;
+            }
+        }
+        return winner;
+    }
+
+
+
+    void endRound(GameRoom room) {
+        final PlayingUser[] users = (PlayingUser[]) room.getUsers().toArray();
+        final int index = winIndex(users);
+        final EndGameReason reason = index == -1 ? EndGameReason.STALEMATE : EndGameReason.WE_HAVE_A_WINNER;
+        if (reason == EndGameReason.STALEMATE) {
+            this.endAsStalemate(room, reason);
+        } else {
+            this.endGame(room, users[index], reason);
+        }
     }
 
     void playerAct(@NotNull GameRoom room, @NotNull PlayingUser actor, @NotNull PlayerActMessage.PlayerActData actData) {
@@ -163,11 +193,11 @@ public class GameEngineService {
             }
             catch (IOException e) {
                 System.out.println(e.getMessage());// обрабатываем действия юзера
-            } catch (NotFoundException e) {
-                e.printStackTrace();
             }
         }
         else if (actData.activatedBossCard) {
+            actor.setSkipped(false);
+            LOGGER.info("[ I ] Boss card activated! ");
             //room.activateBossCard(actor);
             //try {
             //    if (room.activateBossCard(actor)) {
@@ -179,7 +209,22 @@ public class GameEngineService {
             //}
         }
         else {
-            //room.placeCard(actor, actData.playerCardId, actData.rowIndex, actData.columnIndex);
+            this.messageService.trySendMessage(actor, new PlayerActResponseMessage(true));
+            // TODO: make honest mechanics
+            try {
+                final GameField field = room.getCurrentField();
+                final Card activeCard = room.popCardFromHand(actor, Math.toIntExact(actData.playerCardId));
+                actor.setCurrentScore(actor.getCurrentScore()+activeCard.getModel().getScore());
+                field.putCard(
+                        activeCard,
+                        field.translateRowIndexToRowOwner(actor, actData.rowIndex) ,
+                        actData.columnIndex);
+                this.messageService.trySendMessage(room, new PlayerActMessage(PLAYER_ACT_ENEMY_ACTED, actData));
+            } catch (GameException e) {
+                LOGGER.warn(String.format("Exception during altering room state:%n%s", e.toString()));
+            }
+
+            /// /room.placeCard(actor, actData.playerCardId, actData.rowIndex, actData.columnIndex);
             //try {
 //
             //    this.messageService.sendMessage(room, new Message(MessageType.GAME, messInfo.toJson(room.getCurrentField())));
@@ -187,12 +232,6 @@ public class GameEngineService {
             //    System.out.println(e.getMessage());// обрабатываем действия юзера
             //}
         }
-        // ToDo доделать сообщения на юзера
-        // действия юзера - активировал карту босса, поставил карту на поле, пропустил ход.
-
-        // выполняем действия после хода юзера
-
-        // отсылаем сообщения
     }
 
 
@@ -225,7 +264,7 @@ public class GameEngineService {
     public enum EndGameReason {
         DISCONNECT,
         WE_HAVE_A_WINNER,
-        JUST_BECAUSE
+        STALEMATE
     }
 
 }
