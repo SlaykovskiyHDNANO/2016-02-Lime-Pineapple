@@ -14,7 +14,8 @@ public enum CardType {
     BEAST("Cards.Living.Creature.Beast"),
     MONSTER("Cards.Living.Creature.Monster"),
     DAEMON("Cards.Living.Spiritual.Daemon"),
-    SPIRIT("Cards.Living.Spiritual.Spirit");
+    SPIRIT("Cards.Living.Spiritual.Spirit"),
+    BOSS("Cards.Special");
 
 
     private final String cardName;

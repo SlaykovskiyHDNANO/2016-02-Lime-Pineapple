@@ -2,6 +2,7 @@ package db.models.game.cards;
 
 import game.BossCard;
 import game.Card;
+import game.PlayingUser;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
@@ -13,10 +14,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class CardFactory {
     AtomicInteger count=new AtomicInteger(0);
-    CardModel createModel(int num, boolean villain) {
+    CardModel[] models;
+    public CardFactory() {
+        models=new CardModel[20];
+        for (int i=0; i<20; i++) {
+            models[i]=createModel(i);
+        }
+    }
+    CardModel createModel(int num) {
         final CardModel model=new CardModel();
-        if (villain) {
-            model.addEffect(createEffect(num-10));
+
+            model.addEffect(createEffect(num));
             switch (num) {
                 case 1: {
                     model.cardName = "BOLOTNIK";
@@ -66,60 +74,55 @@ public class CardFactory {
                     model.setCharacters(CardType.DAEMON, 10, true, false, false, false, 5);
                     return model;
                 }
-                default: {
+                case 10: {
                     model.cardName = "TUGARIN";
                     model.setCharacters(CardType.DAEMON, 10, false, true, false, false, 10);
                     return model;
                 }
-            }
-        }
-        else {
-            model.addEffect(createEffect(num));
-            switch (num) {
-                case 1: {
+                case 11: {
                     model.cardName = "DOMOVOI";
                     model.setCharacters(CardType.MONSTER, 10, false, false, true, true, 8);
                     return model;
                 }
-                case 2: {
+                case 12: {
 
                     model.cardName = "NESMEANA";
                     model.setCharacters(CardType.HUMAN, 10, true, true, false, false, 8);
                     return model;
                 }
-                case 3: {
+                case 13: {
 
                     model.cardName = "BOGATUR";
                     model.setCharacters(CardType.HUMAN, 10, true, false, false, false, 5);
                     return model;
                 }
-                case 4: {
+                case 14: {
                     model.cardName = "VARVARA";
                     model.setCharacters(CardType.HUMAN, 10, true, false, true, false, 6);
                     return model;
                 }
-                case 5: {
+                case 15: {
                     model.cardName = "FINIST";
                     final boolean distant = new Random().nextBoolean();
                     model.setCharacters(CardType.HUMAN, 10, true, false, true, false, 15);
                     return model;
                 }
-                case 6: {
+                case 16: {
                     model.cardName = "VASILISYA PREKRASNAYA";
                     model.setCharacters(CardType.HUMAN, 10, false, false, true, false, 7);
                     return model;
                 }
-                case 7: {
+                case 17: {
                     model.cardName = "MARIA MOREVNA";
                     model.setCharacters(CardType.HUMAN, 10, true, false, false, false, 12);
                     return model;
                 }
-                case 8: {
+                case 18: {
                     model.cardName = "MOROZKO";
                     model.setCharacters(CardType.HUMAN, 10, true, false, false, false, 18);
                     return model;
                 }
-                case 9: {
+                case 19: {
                     model.cardName = "LESOVIK";
                     model.setCharacters(CardType.BEAST, 10, false, true, false, false, 3);
                     return model;
@@ -132,45 +135,62 @@ public class CardFactory {
             }
         }
 
-    }
+
     @Nullable
     EffectModel createEffect(int num) {
         switch (num) {
-            case 1:
-                return new EffectModel("Two kind cards added", "AddKindCards", CardType.MONSTER, "addcards.gif");
-            case 2:
-                return new EffectModel("Destroys enemys strongest card", "RemovwStringVickedCard", CardType.HUMAN, "remvickcard.gif");
-            case 3:
-                return new EffectModel("Pair Card","Pair card",CardType.HUMAN, "pair.gif" );
-            case 5:
-                return new EffectModel("Invulnarable to effects","Effect shield",CardType.HUMAN, "shield.gif" );
-            case 6:
-                return new EffectModel("ressurects killed card","Ressurect",CardType.HUMAN, "ressurect.gif" );
-            case 8:
-                return new EffectModel("Cold attack","Cold",CardType.HUMAN, "cold.gif" );
-            case 9:
-                return new EffectModel("Calls anotherCard","ALENUSHKACALL",CardType.BEAST, "alcall.gif" );
             case 11:
-                return new EffectModel("Invulnarable to effects","Effect shield",CardType.MONSTER, "shield.gif" );
+                return new EffectModel("Two kind cards added", "AddKindCards", CardType.MONSTER, "addcards.gif");
             case 12:
-                return new EffectModel("Increases other cards strength 1.5 times","Strength increase",CardType.BEAST, "strength.gif" );
+                return new EffectModel("Destroys enemys strongest card", "RemovwStringVickedCard", CardType.HUMAN, "remvickcard.gif");
             case 13:
-                return new EffectModel("Destroys any card","DestroyCard",CardType.DAEMON, "dagger.gif" );
-            case 14:
-                return new EffectModel("Calls two copys","Triple",CardType.DAEMON, "triple.gif" );
+                return new EffectModel("Pair Card","Pair card",CardType.HUMAN, "pair.gif" );
+            case 15:
+                return new EffectModel("Invulnarable to effects","Effect shield",CardType.HUMAN, "shield.gif" );
             case 16:
-                return new EffectModel("Increases other cards strength 1.5 times","Strength increase",CardType.BEAST, "strength.gif" );
-            case 17:
-                return new EffectModel("Adds two evil cards","call of two evil cards",CardType.BEAST, "evilcall.gif" );
+                return new EffectModel("ressurects killed card","Ressurect",CardType.HUMAN, "ressurect.gif" );
             case 18:
-                return new EffectModel("Destroys enemy card","DestroyEnCard",CardType.BEAST, "dagger.gif" );
+                return new EffectModel("Cold attack","Cold",CardType.HUMAN, "cold.gif" );
             case 19:
+                return new EffectModel("Calls anotherCard","ALENUSHKACALL",CardType.BEAST, "alcall.gif" );
+            case 1:
+                return new EffectModel("Invulnarable to effects","Effect shield",CardType.MONSTER, "shield.gif" );
+            case 2:
+                return new EffectModel("Increases other cards strength 1.5 times","Strength increase",CardType.BEAST, "strength.gif" );
+            case 3:
+                return new EffectModel("Destroys any card","DestroyCard",CardType.DAEMON, "dagger.gif" );
+            case 4:
+                return new EffectModel("Calls two copys","Triple",CardType.DAEMON, "triple.gif" );
+            case 6:
+                return new EffectModel("Increases other cards strength 1.5 times","Strength increase",CardType.BEAST, "strength.gif" );
+            case 7:
+                return new EffectModel("Adds two evil cards","call of two evil cards",CardType.BEAST, "evilcall.gif" );
+            case 8:
+                return new EffectModel("Destroys enemy card","DestroyEnCard",CardType.BEAST, "dagger.gif" );
+            case 9:
                 return new EffectModel("Invulnarrable, sucks enemys power","SuckingStrength",CardType.DAEMON, "skull.gif" );
             default: return null;
         }
 
     }
-    public Card createCard(int num, boolean vicked) {
-        return new Card(createModel(num, vicked),count.incrementAndGet());
+    public CardModel getModel() {
+        return this.models[new Random().nextInt(20)];
     }
-}
+    public CardModel createBoss() {
+        final CardModel model=new CardModel();
+        if (new Random().nextBoolean()){
+            model.cardName="LESHUI";
+            model.addEffect(new EffectModel("Calls any 2 card sum power 15", "Forest spiritism", CardType.BOSS, "forestspiritism.gif"));
+        }
+        else {
+            model.cardName="FINIST (BOSS)";
+            model.addEffect(new EffectModel("Burns any card other cards lose 1 power", "Burning", CardType.BOSS, "burn.gif"));
+
+        }
+
+        return model;
+    }
+    public CardModel[] getModels() {
+        return models;
+    }
+ }
