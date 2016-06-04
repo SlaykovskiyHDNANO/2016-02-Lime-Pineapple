@@ -14,9 +14,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CardFactory {
     AtomicInteger count=new AtomicInteger(0);
     CardModel[] models;
+    static int cardCollectionSize = 24;
     public CardFactory() {
-        models=new CardModel[20];
-        for (int i=0; i<20; i++) {
+        models=new CardModel[cardCollectionSize];
+        for (int i=0; i<cardCollectionSize; i++) {
             models[i]=createModel(i);
         }
     }
@@ -31,9 +32,8 @@ public class CardFactory {
                     return model;
                 }
                 case 2: {
-
-                    model.cardName = "VOLKOLAK-LIDER";
-                    model.setCharacters(CardType.BEAST, 10, true, false, false, false, 8);
+                    model.cardName = "RYABA-MISH";
+                    model.setCharacters(CardType.MONSTER, 10, true, false, true, false, 14);
                     return model;
                 }
                 case 3: {
@@ -59,8 +59,8 @@ public class CardFactory {
                     return model;
                 }
                 case 7: {
-                    model.cardName = "HEN_AND_CHICKEN";
-                    model.setCharacters(CardType.BEAST, 10, false, true, false, true, 1);
+                    model.cardName = "FINIST";
+                    model.setCharacters(CardType.HUMAN, 10, false, false, true, true, 8);
                     return model;
                 }
                 case 8: {
@@ -90,40 +90,59 @@ public class CardFactory {
                     return model;
                 }
                 case 13: {
-
-                    model.cardName = "BOGATUR";
-                    model.setCharacters(CardType.HUMAN, 10, true, false, false, false, 5);
-                    return model;
-                }
-                case 14: {
                     model.cardName = "VARVARA";
                     model.setCharacters(CardType.HUMAN, 10, true, false, true, false, 6);
                     return model;
                 }
-                case 15: {
+                case 14: {
                     model.cardName = "FINIST";
                     final boolean distant = new Random().nextBoolean();
                     model.setCharacters(CardType.HUMAN, 10, true, false, true, false, 15);
                     return model;
                 }
-                case 16: {
+                case 15: {
                     model.cardName = "VASILISYA_PREKRASNAYA";
                     model.setCharacters(CardType.HUMAN, 10, false, false, true, false, 7);
                     return model;
                 }
-                case 17: {
+                case 16: {
                     model.cardName = "MARIA_MOREVNA";
                     model.setCharacters(CardType.HUMAN, 10, true, false, false, false, 12);
                     return model;
                 }
-                case 18: {
+                case 17: {
                     model.cardName = "MOROZKO";
                     model.setCharacters(CardType.HUMAN, 10, true, false, false, false, 18);
                     return model;
                 }
-                case 19: {
+                case 18: {
                     model.cardName = "LESOVIK";
                     model.setCharacters(CardType.BEAST, 10, false, true, false, false, 3);
+                    return model;
+                }
+                case 19: {
+                    model.cardName = "RUSALKI";
+                    model.setCharacters(CardType.BEAST, 10, false, false, true, false, 3);
+                    return model;
+                }
+                case 20: {
+                    model.cardName = "VOLKOLAK-SOLDAT";
+                    model.setCharacters(CardType.BEAST, 10, false, false, true, false, 6);
+                    return model;
+                }
+                case 21: {
+                    model.cardName = "ILIA_MUROMETS";
+                    model.setCharacters(CardType.HUMAN, 10, true, false, false, false, 18);
+                    return model;
+                }
+                case 22: {
+                    model.cardName = "ALESHA_POPOVICH";
+                    model.setCharacters(CardType.HUMAN, 10, true, false, false, false, 18);
+                    return model;
+                }
+                case 23: {
+                    model.cardName = "DOBRINYA_NIKITICH";
+                    model.setCharacters(CardType.HUMAN, 10, true, false, false, false, 18);
                     return model;
                 }
                 default: {
